@@ -11,7 +11,7 @@ int main()
 {
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-    printf("Usage: \n [s] to start server\n [q] to stop\n [-] and [=] to scale video size.\n\n");
+    printf("Usage: \n [s] to start server\n [q] to stop server\n [9] to volume down\n [0] to volume up\n\n"/* [-] and [=] to scale video size.\n\n"*/);
 
     CSDLPlayer player;
     player.init();

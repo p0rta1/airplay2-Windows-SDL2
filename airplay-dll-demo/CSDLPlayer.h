@@ -9,7 +9,8 @@
 
 typedef void sdlAudioCallback(void* userdata, Uint8* stream, int len);
 
-typedef struct SDemoAudioFrame {
+typedef struct SDemoAudioFrame
+{
 	unsigned long long pts;
 	unsigned int dataTotal;
 	unsigned int dataLeft;
@@ -20,6 +21,8 @@ typedef std::queue<SDemoAudioFrame*> SDemoAudioFrameQueue;
 typedef std::queue<SFgVideoFrame*> SFgVideoFrameQueue;
 
 #define VIDEO_SIZE_CHANGED_CODE 1
+#define VIDEO_INIT_HEIGHT_SIZE 400
+#define VIDEO_INIT_WIDTH_SIZE 600
 
 class CSDLPlayer
 {
@@ -36,13 +39,16 @@ public:
 
 	void initVideo(int width, int height);
 	void unInitVideo();
+	void resizeWindow(int width, int height);
 	void initAudio(SFgAudioFrame* data);
 	void unInitAudio();
+
+	void cleaningOverlay();
 	static void sdlAudioCallback(void* userdata, Uint8* stream, int len);
 
-	SDL_Surface* m_surface;
-	//SDL_VideoInfo* vi;
-	SDL_Overlay* m_yuv;
+	SDL_Texture* m_surface;
+	SDL_Window* m_overlay;
+	SDL_Renderer* m_renderer;
 	SDL_Rect m_rect;
 
 	SFgAudioFrame m_sAudioFmt;
@@ -58,5 +64,5 @@ public:
 
 	CAirServer m_server;
 	float m_fRatio;
+	byte m_bVolume = 100;
 };
-

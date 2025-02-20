@@ -20,5 +20,9 @@ typedef struct SFgVideoFrame {
 	unsigned int pitch[3];
 	unsigned int dataLen[3];
 	unsigned int dataTotalLen;
-	unsigned char* data;
+	unsigned char* framey;
+	unsigned char* frameu;
+	unsigned char* framev;
+	unsigned char* ffmpeg_data[8];
+	int linesize[8];
 }SFgVideoFrame;

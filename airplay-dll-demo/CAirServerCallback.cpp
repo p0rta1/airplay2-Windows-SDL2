@@ -12,26 +12,32 @@ CAirServerCallback::CAirServerCallback()
 }
 
 CAirServerCallback::~CAirServerCallback()
-{
-}
+{}
 
 void CAirServerCallback::setPlayer(CSDLPlayer* pPlayer)
 {
 	m_pPlayer = pPlayer;
 }
 
-void CAirServerCallback::connected(const char* remoteName, const char* remoteDeviceId) {
-	if (remoteDeviceId != NULL) {
+void CAirServerCallback::connected(const char* remoteName, const char* remoteDeviceId)
+{
+	if (remoteDeviceId != NULL)
+	{
 		strncpy(m_chRemoteDeviceId, remoteDeviceId, 128);
 	}
 
 	setlocale(LC_CTYPE, "");
 	std::wstring name = CFgUtf8Utils::UTF8_To_UTF16(remoteName);
-	wprintf(L"Client Name: %s\n", name.c_str());
+	wprintf(L"\nConnected Client Name: %s\n", name.c_str());
 }
 
-void CAirServerCallback::disconnected(const char* remoteName, const char* remoteDeviceId) {
+void CAirServerCallback::disconnected(const char* remoteName, const char* remoteDeviceId)
+{
 	memset(m_chRemoteDeviceId, 0, 128);
+
+	std::wstring name = CFgUtf8Utils::UTF8_To_UTF16(remoteName);
+	wprintf(L"\nDisconnect Client Name: %s\n", name.c_str());
+	m_pPlayer->cleaningOverlay();
 }
 
 void CAirServerCallback::outputAudio(SFgAudioFrame* data, const char* remoteName, const char* remoteDeviceId)

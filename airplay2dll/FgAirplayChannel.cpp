@@ -2,13 +2,13 @@
 #include "CAutoLock.h"
 
 FgAirplayChannel::FgAirplayChannel(IAirServerCallback* pCallback)
-: m_nRef(1)
-, m_pCallback(pCallback)
-, m_pCodec(NULL)
-, m_pCodecCtx(NULL)
-, m_pSwsCtx(NULL)
-, m_bCodecOpened(false)
-, m_fScaleRatio(1.0f)
+	: m_nRef(1)
+	, m_pCallback(pCallback)
+	, m_pCodec(NULL)
+	, m_pCodecCtx(NULL)
+	, m_pSwsCtx(NULL)
+	, m_bCodecOpened(false)
+	, m_fScaleRatio(1.0f)
 {
 	memset(&m_sVideoFrameOri, 0, sizeof(SFgVideoFrame));
 	memset(&m_sVideoFrameScale, 0, sizeof(SFgVideoFrame));
@@ -20,16 +20,16 @@ FgAirplayChannel::FgAirplayChannel(IAirServerCallback* pCallback)
 FgAirplayChannel::~FgAirplayChannel()
 {
 	m_pCallback = NULL;
-	if (m_sVideoFrameOri.data)
-	{
-		delete[] m_sVideoFrameOri.data;
-		m_sVideoFrameOri.data = NULL;
-	}
-	if (m_sVideoFrameScale.data)
-	{
-		delete[] m_sVideoFrameScale.data;
-		m_sVideoFrameScale.data = NULL;
-	}
+	//if (m_sVideoFrameOri.data)
+	//{
+	//	delete[] m_sVideoFrameOri.data;
+	//	m_sVideoFrameOri.data = NULL;
+	//}
+	//if (m_sVideoFrameScale.data)
+	//{
+	//	delete[] m_sVideoFrameScale.data;
+	//	m_sVideoFrameScale.data = NULL;
+	//}
 
 	unInitFFmpeg();
 
@@ -54,12 +54,15 @@ long FgAirplayChannel::release()
 	return (m_nRef > 1 ? m_nRef : 1);
 }
 
-int FgAirplayChannel::initFFmpeg(const void* privatedata, int privatedatalen) {
-	if (m_pCodec == NULL) {
+int FgAirplayChannel::initFFmpeg(const void* privatedata, int privatedatalen)
+{
+	if (m_pCodec == NULL)
+	{
 		m_pCodec = avcodec_find_decoder(AV_CODEC_ID_H264);
 		m_pCodecCtx = avcodec_alloc_context3(m_pCodec);
 	}
-	if (m_pCodec == NULL) {
+	if (m_pCodec == NULL)
+	{
 		return -1;
 	}
 
@@ -85,7 +88,8 @@ void FgAirplayChannel::unInitFFmpeg()
 	CAutoLock oLock(m_mutexVideo, "unInitFFmpeg");
 	if (m_pCodecCtx)
 	{
-		if (m_pCodecCtx->extradata) {
+		if (m_pCodecCtx->extradata)
+		{
 			av_freep(&m_pCodecCtx->extradata);
 		}
 		avcodec_free_context(&m_pCodecCtx);
@@ -104,18 +108,23 @@ float FgAirplayChannel::setScale(float fRatio)
 	return m_fScaleRatio;
 }
 
-int FgAirplayChannel::decodeH264Data(SFgH264Data* data, const char* remoteName, const char* remoteDeviceId) {
+int FgAirplayChannel::decodeH264Data(SFgH264Data* data, const char* remoteName, const char* remoteDeviceId)
+{
 	int ret = 0;
-	if (!m_bCodecOpened && !data->is_key) {
+	if (!m_bCodecOpened && !data->is_key)
+	{
 		return 0;
 	}
-	if (data->is_key) {
+	if (data->is_key)
+	{
 		ret = initFFmpeg(data->data, data->size);
-		if (ret < 0) {
+		if (ret < 0)
+		{
 			return ret;
 		}
 	}
-	if (!m_bCodecOpened) {
+	if (!m_bCodecOpened)
+	{
 		return 0;
 	}
 
@@ -137,12 +146,13 @@ int FgAirplayChannel::decodeH264Data(SFgH264Data* data, const char* remoteName, 
 	if (frameFinished == 0)
 	{
 		if (m_sVideoFrameOri.width != pFrame->width ||
-			m_sVideoFrameOri.height != pFrame->height) {
-			if (m_sVideoFrameOri.data)
-			{
-				delete[] m_sVideoFrameOri.data;
-				m_sVideoFrameOri.data = NULL;
-			}
+			m_sVideoFrameOri.height != pFrame->height)
+		{
+			//if (m_sVideoFrameOri.data)
+			//{
+			//	delete[] m_sVideoFrameOri.data;
+			//	m_sVideoFrameOri.data = NULL;
+			//}
 		}
 
 		m_sVideoFrameOri.width = pFrame->width;
@@ -156,24 +166,45 @@ int FgAirplayChannel::decodeH264Data(SFgH264Data* data, const char* remoteName, 
 		m_sVideoFrameOri.dataLen[0] = ySize;
 		m_sVideoFrameOri.dataLen[1] = uSize;
 		m_sVideoFrameOri.dataLen[2] = vSize;
-		if (!m_sVideoFrameOri.data)
+		//if (!m_sVideoFrameOri.data)
+		//{
+		//	m_sVideoFrameOri.data = new uint8_t[m_sVideoFrameOri.dataTotalLen];
+		//}
+		if (!m_sVideoFrameOri.framey)
 		{
-			m_sVideoFrameOri.data = new uint8_t[m_sVideoFrameOri.dataTotalLen];
+			m_sVideoFrameOri.framey = new uint8_t[ySize];
 		}
-		memcpy(m_sVideoFrameOri.data, pFrame->data[0], ySize);
-		memcpy(m_sVideoFrameOri.data + ySize, pFrame->data[1], uSize);
-		memcpy(m_sVideoFrameOri.data + ySize + uSize, pFrame->data[2], vSize);
+		if (!m_sVideoFrameOri.frameu)
+		{
+			m_sVideoFrameOri.frameu = new uint8_t[uSize];
+		}
+		if (!m_sVideoFrameOri.framev)
+		{
+			m_sVideoFrameOri.framev = new uint8_t[vSize];
+		}
+
+		memcpy(m_sVideoFrameOri.framey, pFrame->data[0], ySize);
+		memcpy(m_sVideoFrameOri.frameu, pFrame->data[1], uSize);
+		memcpy(m_sVideoFrameOri.framev, pFrame->data[2], vSize);
+
+		//memcpy(m_sVideoFrameOri.data, pFrame->data[0], ySize);
+		//memcpy(m_sVideoFrameOri.data + ySize, pFrame->data[1], uSize);
+		//memcpy(m_sVideoFrameOri.data + ySize + uSize, pFrame->data[2], vSize);
 		m_sVideoFrameOri.pitch[0] = pFrame->linesize[0];
 		m_sVideoFrameOri.pitch[1] = pFrame->linesize[1];
 		m_sVideoFrameOri.pitch[2] = pFrame->linesize[2];
+		memcpy(&m_sVideoFrameOri.ffmpeg_data, &pFrame->data, sizeof(pFrame->data));
+		memcpy(&m_sVideoFrameOri.linesize, &pFrame->linesize, sizeof(pFrame->linesize));
 
 		if (m_pCallback != NULL)
 		{
-			if (m_fScaleRatio < 0.9999f || m_fScaleRatio > 1.0001f) {
+			if (m_fScaleRatio < 0.9999f || m_fScaleRatio > 1.0001f)
+			{
 				scaleH264Data(&m_sVideoFrameOri);
 				m_pCallback->outputVideo(&m_sVideoFrameScale, remoteName, remoteDeviceId);
 			}
-			else {
+			else
+			{
 				m_pCallback->outputVideo(&m_sVideoFrameOri, remoteName, remoteDeviceId);
 			}
 		}
@@ -195,13 +226,13 @@ int FgAirplayChannel::scaleH264Data(SFgVideoFrame* pSrcFrame)
 	if (!m_pSwsCtx)
 	{
 		m_pSwsCtx = sws_getContext(pSrcFrame->width, pSrcFrame->height, AV_PIX_FMT_YUV420P,
-			nScreenWidth, nScreenHeight, AV_PIX_FMT_YUV420P, SWS_BICUBIC /*SWS_POINT*/,
-			NULL, NULL, NULL);
+								   nScreenWidth, nScreenHeight, AV_PIX_FMT_YUV420P, SWS_BICUBIC /*SWS_POINT*/,
+								   NULL, NULL, NULL);
 	}
 	if (m_sVideoFrameScale.width != nScreenWidth || m_sVideoFrameScale.height != nScreenHeight)
 	{
-		delete[] m_sVideoFrameScale.data;
-		m_sVideoFrameScale.data = NULL;
+		//delete[] m_sVideoFrameScale.data;
+		//m_sVideoFrameScale.data = NULL;
 	}
 
 	m_sVideoFrameScale.width = nScreenWidth;
@@ -219,16 +250,32 @@ int FgAirplayChannel::scaleH264Data(SFgVideoFrame* pSrcFrame)
 	m_sVideoFrameScale.dataLen[0] = ySize;
 	m_sVideoFrameScale.dataLen[1] = uSize;
 	m_sVideoFrameScale.dataLen[2] = vSize;
-	if (!m_sVideoFrameScale.data) {
-		m_sVideoFrameScale.data = new uint8_t[m_sVideoFrameScale.dataTotalLen];
+	//if (!m_sVideoFrameScale.data) {
+	//	m_sVideoFrameScale.data = new uint8_t[m_sVideoFrameScale.dataTotalLen];
+	//}
+
+	if (!m_sVideoFrameOri.framey)
+	{
+		m_sVideoFrameOri.framey = new uint8_t[ySize];
+	}
+	if (!m_sVideoFrameOri.frameu)
+	{
+		m_sVideoFrameOri.frameu = new uint8_t[uSize];
+
+	}
+	if (!m_sVideoFrameOri.framev)
+	{
+		m_sVideoFrameOri.framev = new uint8_t[vSize];
 	}
 
-	const uint8_t* srcSlice[3] = { pSrcFrame->data, pSrcFrame->data + pSrcFrame->dataLen[0], pSrcFrame->data + pSrcFrame->dataLen[0] + pSrcFrame->dataLen[1] };
-	const uint8_t* dst[3] = { m_sVideoFrameScale.data,
-		m_sVideoFrameScale.data + m_sVideoFrameScale.dataLen[0],
-		m_sVideoFrameScale.data + m_sVideoFrameScale.dataLen[0] + m_sVideoFrameScale.dataLen[1] };
-	sws_scale(m_pSwsCtx, (const uint8_t* const*)srcSlice, (const int*)pSrcFrame->pitch, 0,
-		pSrcFrame->height, (uint8_t* const*)dst, (const int*)m_sVideoFrameScale.pitch);
+	memcpy(m_sVideoFrameOri.framey, pSrcFrame->framey, ySize);
+	memcpy(m_sVideoFrameOri.frameu, pSrcFrame->frameu, uSize);
+	memcpy(m_sVideoFrameOri.framev, pSrcFrame->framev, vSize);
+
+
+	//const uint8_t* srcSlice[3] = { pSrcFrame->data, pSrcFrame->data + pSrcFrame->dataLen[0], pSrcFrame->data + pSrcFrame->dataLen[0] + pSrcFrame->dataLen[1] };
+	const uint8_t* dst[3] = { m_sVideoFrameScale.framey, m_sVideoFrameScale.frameu,	m_sVideoFrameScale.framev };
+	sws_scale(m_pSwsCtx, (const uint8_t* const*)dst, (const int*)pSrcFrame->pitch, 0, pSrcFrame->height, (uint8_t* const*)dst, (const int*)m_sVideoFrameScale.pitch);
 
 	return 0;
 }
